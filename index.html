@@ -1,0 +1,2407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brazil Partner Plan Simulator</title>
+  <style>
+    :root {
+      --artifact-background: var(--theme-background, #ffffff);
+      --artifact-background-light: var(--theme-background-light, #f6f6f6);
+      --artifact-background-mid: var(--theme-background-mid, #f0f0f0);
+      --artifact-border-light: var(--theme-border-light, #e5e5e5);
+      --artifact-border-dark: var(--theme-border-dark, #cccccc);
+      --artifact-primary-brand: var(--theme-primary-brand, #343ced);
+      --artifact-primary-highlight: var(--theme-primary-highlight, #1b1b1b);
+      --artifact-primary-hover: var(--theme-primary-hover, #404040);
+      --artifact-selected: var(--theme-selected, #e8e8e8);
+      --artifact-text-primary: var(--theme-text-primary, #1b1b1b);
+      --artifact-text-secondary: var(--theme-text-secondary, #727272);
+      --artifact-text-highlight: var(--theme-text-highlight, #fff8e5);
+      --artifact-chart-indigo: #343ced;
+      --artifact-chart-indigo-soft: #dfe2ff;
+      --artifact-chart-olive: #82951e;
+      --artifact-chart-olive-soft: #edf4d1;
+      --artifact-chart-tangerine: #ef601b;
+      --artifact-chart-tangerine-soft: #ffe4d6;
+      --artifact-chart-magenta: #dd2ca5;
+      --artifact-chart-magenta-soft: #ffd9f2;
+      --artifact-positive-background: #e9f7ef;
+      --artifact-positive-text: #1b1b1b;
+      --artifact-negative-background: #fdeaea;
+      --artifact-negative-text: #1b1b1b;
+      --artifact-warn-background: #fff3dd;
+      --artifact-warn-text: #1b1b1b;
+      --artifact-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+    }
+    html[data-theme='dark'] {
+      --artifact-chart-indigo-soft: #1e246e;
+      --artifact-chart-olive-soft: #2e3912;
+      --artifact-chart-tangerine-soft: #5d2510;
+      --artifact-chart-magenta-soft: #59203f;
+      --artifact-positive-background: #12351f;
+      --artifact-positive-text: #d8f5df;
+      --artifact-negative-background: #4d1717;
+      --artifact-negative-text: #ffd8d8;
+      --artifact-warn-background: #4a3313;
+      --artifact-warn-text: #ffe6c2;
+      --artifact-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--artifact-background);
+      color: var(--artifact-text-primary);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .shell {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .hero {
+      background: linear-gradient(135deg, var(--artifact-background-light), var(--artifact-background));
+      border: 1px solid var(--artifact-border-light);
+      border-radius: 22px;
+      padding: 28px;
+      box-shadow: var(--artifact-shadow);
+      margin-bottom: 20px;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--artifact-chart-indigo-soft);
+      color: var(--artifact-text-primary);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 14px 0 10px;
+      font-size: clamp(30px, 4vw, 46px);
+      line-height: 1.05;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+    .subhead {
+      max-width: 920px;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--artifact-text-secondary);
+      margin: 0;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+    .panel {
+      background: var(--artifact-background);
+      border: 1px solid var(--artifact-border-light);
+      border-radius: 20px;
+      box-shadow: var(--artifact-shadow);
+    }
+    .controls {
+      position: sticky;
+      top: 18px;
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+    .section-card {
+      background: var(--artifact-background-light);
+      border: 1px solid var(--artifact-border-light);
+      border-radius: 16px;
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .section-note {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--artifact-text-secondary);
+    }
+    .grid-2, .grid-3 {
+      display: grid;
+      gap: 10px;
+    }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    label {
+      display: grid;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--artifact-text-secondary);
+      font-weight: 600;
+    }
+    input {
+      width: 100%;
+      border: 1px solid var(--artifact-border-dark);
+      background: var(--artifact-background);
+      color: var(--artifact-text-primary);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+    }
+    input:hover { border-color: var(--artifact-primary-highlight); }
+    input:focus {
+      border-color: var(--artifact-primary-brand);
+      background: var(--artifact-background-light);
+      transform: translateY(-1px);
+    }
+    .button-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+    button {
+      border: 1px solid var(--artifact-border-dark);
+      background: var(--artifact-background);
+      color: var(--artifact-text-primary);
+      border-radius: 12px;
+      padding: 11px 12px;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+    }
+    button:hover {
+      transform: translateY(-1px);
+      border-color: var(--artifact-primary-highlight);
+      background: var(--artifact-background-light);
+    }
+    button.primary {
+      background: var(--artifact-primary-highlight);
+      color: var(--artifact-background);
+      border-color: var(--artifact-primary-highlight);
+    }
+    button.primary:hover {
+      background: var(--artifact-primary-hover);
+      border-color: var(--artifact-primary-hover);
+    }
+    .content {
+      display: grid;
+      gap: 18px;
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .kpi {
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px solid var(--artifact-border-light);
+      background: var(--artifact-background);
+      box-shadow: var(--artifact-shadow);
+      min-height: 112px;
+    }
+    .kpi .label {
+      font-size: 12px;
+      color: var(--artifact-text-secondary);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 700;
+    }
+    .kpi .value {
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+    }
+    .kpi .meta {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--artifact-text-secondary);
+      line-height: 1.4;
+    }
+    .kpi.negative { background: var(--artifact-negative-background); color: var(--artifact-negative-text); }
+    .kpi.positive { background: var(--artifact-positive-background); color: var(--artifact-positive-text); }
+    .kpi.warn { background: var(--artifact-warn-background); color: var(--artifact-warn-text); }
+    .stack {
+      display: grid;
+      gap: 18px;
+      padding: 18px;
+    }
+    .stack-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 14px;
+      margin-bottom: 4px;
+    }
+    .stack-head h2 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.15;
+    }
+    .stack-head p {
+      margin: 0;
+      color: var(--artifact-text-secondary);
+      font-size: 13px;
+      line-height: 1.5;
+      max-width: 620px;
+    }
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 16px;
+    }
+    .chart-card, .table-card {
+      background: var(--artifact-background-light);
+      border: 1px solid var(--artifact-border-light);
+      border-radius: 18px;
+      padding: 16px;
+    }
+    .chart-wrap {
+      height: 320px;
+      position: relative;
+      overflow: hidden;
+    }
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .mini-metric {
+      background: var(--artifact-background);
+      border: 1px solid var(--artifact-border-light);
+      border-radius: 16px;
+      padding: 14px;
+    }
+    .mini-metric .small { font-size: 12px; color: var(--artifact-text-secondary); margin-bottom: 8px; }
+    .mini-metric .big { font-size: 22px; font-weight: 800; letter-spacing: -0.03em; }
+    .annual-table, .monthly-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .annual-table th, .annual-table td,
+    .monthly-table th, .monthly-table td {
+      padding: 11px 10px;
+      border-bottom: 1px solid var(--artifact-border-light);
+      text-align: right;
+      vertical-align: top;
+    }
+    .annual-table th:first-child, .annual-table td:first-child,
+    .monthly-table th:first-child, .monthly-table td:first-child { text-align: left; }
+    .annual-table th, .monthly-table th {
+      color: var(--artifact-text-secondary);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      position: sticky;
+      top: 0;
+      background: var(--artifact-background-light);
+      z-index: 2;
+    }
+    .monthly-wrap {
+      max-height: 430px;
+      overflow: auto;
+      border-radius: 14px;
+      border: 1px solid var(--artifact-border-light);
+      background: var(--artifact-background);
+    }
+    .monthly-table .neg { color: var(--artifact-chart-tangerine); font-weight: 700; }
+    .monthly-table .pos { color: var(--artifact-chart-olive); font-weight: 700; }
+    .monthly-table tr.highlight td { background: var(--artifact-chart-indigo-soft); }
+    .insight-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .insight {
+      border: 1px solid var(--artifact-border-light);
+      border-radius: 18px;
+      background: var(--artifact-background-light);
+      padding: 16px;
+    }
+    .insight h3 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      line-height: 1.2;
+    }
+    .insight ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--artifact-text-secondary);
+      line-height: 1.65;
+      font-size: 14px;
+    }
+    .footnote {
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: var(--artifact-background-light);
+      border: 1px solid var(--artifact-border-light);
+      color: var(--artifact-text-secondary);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 8px;
+      color: var(--artifact-text-secondary);
+      font-size: 12px;
+    }
+    .legend span { display: inline-flex; align-items: center; gap: 8px; }
+    .dot {
+      width: 10px; height: 10px; border-radius: 999px; display: inline-block;
+      background: var(--artifact-chart-indigo);
+    }
+    .dot.orange { background: var(--artifact-chart-tangerine); }
+    .dot.green { background: var(--artifact-chart-olive); }
+    .dot.magenta { background: var(--artifact-chart-magenta); }
+    .divider {
+      height: 1px;
+      background: var(--artifact-border-light);
+      margin: 4px 0;
+    }
+    .tag {
+      display: inline-flex;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--artifact-selected);
+      color: var(--artifact-text-primary);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    @media screen and (max-width: 1180px) {
+      .layout { grid-template-columns: 1fr; }
+      .controls { position: static; }
+      .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .chart-grid, .insight-grid, .mini-grid { grid-template-columns: 1fr; }
+    }
+    @media screen and (max-width: 720px) {
+      .shell { padding: 14px; }
+      .hero { padding: 20px; }
+      .kpi-grid, .grid-2, .grid-3, .button-row { grid-template-columns: 1fr; }
+    }
+    @media print {
+      body {
+        margin: 0;
+        padding: 0.4in 0.6in;
+        background: #fff;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+      .container, .dashboard, .shell, main {
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+      [style*="position:sticky"], [style*="position: sticky"],
+      [class*="topbar"], [class*="navbar"], [class*="header"][class*="sticky"] {
+        position: static !important;
+      }
+      section, [class*="section"], .header {
+        break-inside: avoid;
+        margin-bottom: 20px !important;
+      }
+      [class*="card"], [class*="Card"] {
+        break-inside: avoid;
+        padding: 18px !important;
+        box-shadow: none !important;
+        border: 1px solid rgba(0,0,0,0.08);
+      }
+      [class*="grid"], [class*="row"] {
+        gap: 10px !important;
+        margin-bottom: 20px !important;
+      }
+      [class*="chart"], [class*="Chart"] {
+        break-inside: avoid;
+        height: 240px !important;
+      }
+      [class*="chart"][class*="tall"], [class*="Chart"][class*="tall"],
+      [class*="chart"][class*="full"], [class*="Chart"][class*="full"] {
+        height: 280px !important;
+      }
+      table, thead, .funnel, .heatmap, .list, .goals { break-inside: avoid; }
+      [class*="quote-list"], [class*="scroll"], [style*="max-height"], [style*="overflow"] {
+        max-height: none !important;
+        overflow: visible !important;
+      }
+      [class*="tab-panel"], [class*="tabpanel"] { display: block !important; }
+      [class*="tab-bar"], [class*="tabs"]:not([class*="panel"]) { display: none !important; }
+      [class*="fade"], [class*="animate"], [class*="slide"] {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+      button, [role="button"], .interactive-only { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero">
+      <div class="eyebrow">Brazil partner plan simulator</div>
+      <h1>Interactive plan, cash ramp, and breakeven model</h1>
+      <p class="subhead">This artifact translates the plan into a working model you can stress-test. Adjust deal mix, conversion, margins, payment terms, hiring, and working-capital assumptions to see month-by-month cash needs, breakeven timing, and the scale of the funding bridge.</p>
+    </section>
+
+    <section class="layout">
+      <aside class="panel controls">
+        <div class="section-card">
+          <h3 class="section-title">Scenario presets <span class="tag">1 click</span></h3>
+          <div class="button-row">
+            <button class="primary" id="baseBtn">Base</button>
+            <button id="consBtn">Conservative</button>
+            <button id="aggBtn">Aggressive</button>
+          </div>
+          <p class="section-note">Base uses the document assumptions. Conservative lowers conversion and stretches cash terms. Aggressive improves execution and collections.</p>
+        </div>
+
+        <div class="section-card">
+          <h3 class="section-title">Core economics</h3>
+          <div class="grid-2">
+            <label>Average ARR (USD)
+              <input id="avg_arr" type="number" step="10000" />
+            </label>
+            <label>FX USD→BRL
+              <input id="fx_rate" type="number" step="0.01" />
+            </label>
+            <label>Services attach rate (%)
+              <input id="services_attach_rate" type="number" step="1" />
+            </label>
+            <label>Services gross margin (%)
+              <input id="services_gross_margin" type="number" step="1" />
+            </label>
+            <label>Resale margin A (%)
+              <input id="resale_margin_A" type="number" step="1" />
+            </label>
+            <label>Resale margin B (%)
+              <input id="resale_margin_B" type="number" step="1" />
+            </label>
+            <label>Resale margin C (%)
+              <input id="resale_margin_C" type="number" step="1" />
+            </label>
+            <label>Marketing per 3 A leads (USD)
+              <input id="marketing_per_3_A_mapped" type="number" step="1000" />
+            </label>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h3 class="section-title">Cash timing and sales-cost structure</h3>
+          <div class="grid-2">
+            <label>Glean payment days
+              <input id="glean_payment_days" type="number" step="1" />
+            </label>
+            <label>Customer collection days
+              <input id="customer_collection_days" type="number" step="1" />
+            </label>
+            <label>Senior fixed / month (USD)
+              <input id="senior_fixed" type="number" step="500" />
+            </label>
+            <label>Senior variable / month (USD)
+              <input id="senior_variable" type="number" step="500" />
+            </label>
+            <label>Pleno fixed / month (USD)
+              <input id="pleno_fixed" type="number" step="500" />
+            </label>
+            <label>Pleno variable / month (USD)
+              <input id="pleno_variable" type="number" step="500" />
+            </label>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h3 class="section-title">Year 1 commercial ramp</h3>
+          <div class="grid-3">
+            <label>Mapped A
+              <input id="y1_mapped_A" type="number" step="1" />
+            </label>
+            <label>Mapped B
+              <input id="y1_mapped_B" type="number" step="1" />
+            </label>
+            <label>Mapped C
+              <input id="y1_mapped_C" type="number" step="1" />
+            </label>
+            <label>Conv. A (%)
+              <input id="y1_conv_A" type="number" step="1" />
+            </label>
+            <label>Conv. B (%)
+              <input id="y1_conv_B" type="number" step="1" />
+            </label>
+            <label>Conv. C (%)
+              <input id="y1_conv_C" type="number" step="1" />
+            </label>
+            <label>Senior HC
+              <input id="y1_senior" type="number" step="1" />
+            </label>
+            <label>Pleno HC
+              <input id="y1_pleno" type="number" step="1" />
+            </label>
+            <label>Delay months
+              <input id="y1_delay" type="number" step="1" />
+            </label>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h3 class="section-title">Year 2 scale-up</h3>
+          <div class="grid-3">
+            <label>Mapped A
+              <input id="y2_mapped_A" type="number" step="1" />
+            </label>
+            <label>Mapped B
+              <input id="y2_mapped_B" type="number" step="1" />
+            </label>
+            <label>Mapped C
+              <input id="y2_mapped_C" type="number" step="1" />
+            </label>
+            <label>Conv. A (%)
+              <input id="y2_conv_A" type="number" step="1" />
+            </label>
+            <label>Conv. B (%)
+              <input id="y2_conv_B" type="number" step="1" />
+            </label>
+            <label>Conv. C (%)
+              <input id="y2_conv_C" type="number" step="1" />
+            </label>
+            <label>Senior HC
+              <input id="y2_senior" type="number" step="1" />
+            </label>
+            <label>Pleno HC
+              <input id="y2_pleno" type="number" step="1" />
+            </label>
+            <label>Delay months
+              <input id="y2_delay" type="number" step="1" />
+            </label>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h3 class="section-title">Year 3 scale-up</h3>
+          <div class="grid-3">
+            <label>Mapped A
+              <input id="y3_mapped_A" type="number" step="1" />
+            </label>
+            <label>Mapped B
+              <input id="y3_mapped_B" type="number" step="1" />
+            </label>
+            <label>Mapped C
+              <input id="y3_mapped_C" type="number" step="1" />
+            </label>
+            <label>Conv. A (%)
+              <input id="y3_conv_A" type="number" step="1" />
+            </label>
+            <label>Conv. B (%)
+              <input id="y3_conv_B" type="number" step="1" />
+            </label>
+            <label>Conv. C (%)
+              <input id="y3_conv_C" type="number" step="1" />
+            </label>
+            <label>Senior HC
+              <input id="y3_senior" type="number" step="1" />
+            </label>
+            <label>Pleno HC
+              <input id="y3_pleno" type="number" step="1" />
+            </label>
+            <label>Delay months
+              <input id="y3_delay" type="number" step="1" />
+            </label>
+          </div>
+        </div>
+      </aside>
+
+      <main class="content">
+        <section class="kpi-grid" id="kpis"></section>
+
+        <section class="panel stack">
+          <div class="stack-head">
+            <div>
+              <h2>Cash ramp and breakeven</h2>
+              <p>Peak cash need is the maximum cumulative funding gap from day 1. Breakeven is the first month when cumulative cash turns positive under the current assumptions.</p>
+            </div>
+            <div class="tag" id="breakevenTag">Base case</div>
+          </div>
+          <div class="chart-grid">
+            <div class="chart-card">
+              <div class="section-title">Cumulative cash by month</div>
+              <div class="chart-wrap" id="cumChart"></div>
+              <div class="legend">
+                <span><i class="dot"></i>Cumulative cash</span>
+                <span><i class="dot orange"></i>Zero line</span>
+              </div>
+            </div>
+            <div class="chart-card">
+              <div class="section-title">Monthly cash and working-capital bridge</div>
+              <div class="chart-wrap" id="flowChart"></div>
+              <div class="legend">
+                <span><i class="dot green"></i>Monthly cash</span>
+                <span><i class="dot magenta"></i>Bridge balance</span>
+              </div>
+            </div>
+          </div>
+          <div class="mini-grid" id="bridgeMini"></div>
+        </section>
+
+        <section class="panel stack">
+          <div class="stack-head">
+            <div>
+              <h2>Annual operating view</h2>
+              <p>This keeps the original plan logic visible while showing the cash overlay and the bridge tied to D+30 versus D+45.</p>
+            </div>
+          </div>
+          <div class="table-card">
+            <table class="annual-table" id="annualTable"></table>
+          </div>
+        </section>
+
+        <section class="panel stack">
+          <div class="stack-head">
+            <div>
+              <h2>Month-by-month investment requirement</h2>
+              <p>The highlighted row marks the modeled breakeven month. Negative cumulative cash shows how much funding is still required at that point in time.</p>
+            </div>
+          </div>
+          <div class="monthly-wrap">
+            <table class="monthly-table" id="monthlyTable"></table>
+          </div>
+        </section>
+
+        <section class="panel stack">
+          <div class="stack-head">
+            <div>
+              <h2>Evaluation and recommended complements</h2>
+              <p>The original plan is economically attractive, but these additions make it more investor-ready and operationally safer for Brazil execution.</p>
+            </div>
+          </div>
+          <div class="insight-grid">
+            <div class="insight">
+              <h3>What is already strong</h3>
+              <ul>
+                <li>Dual engine of resale margin plus high-margin services.</li>
+                <li>Deal mix intentionally migrates from co-sell to partner-originated revenue.</li>
+                <li>Working-capital gap is short enough to be financeable.</li>
+                <li>Commercial headcount ramp is disciplined versus target volume.</li>
+              </ul>
+            </div>
+            <div class="insight">
+              <h3>What is missing from the plan</h3>
+              <ul>
+                <li>G&amp;A, taxes, legal, and entity setup costs for Brazil are not yet layered in.</li>
+                <li>No delivery-capacity model validates the 40% services margin at scale.</li>
+                <li>No churn, renewal, or expansion assumptions support long-term channel value.</li>
+                <li>No FX protection or credit policy is defined despite a Brazil operating context.</li>
+              </ul>
+            </div>
+            <div class="insight">
+              <h3>Best complements to add</h3>
+              <ul>
+                <li>Add quarterly pipeline-coverage targets by motion A, B, and C.</li>
+                <li>Add a services utilization plan by role and expected delivery mix.</li>
+                <li>Add a credit-line policy sized to the bridge shown in this model plus contingency.</li>
+                <li>Add enablement milestones, reference wins, and renewal-governance checkpoints.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="footnote" id="assumptionNote"></div>
+        </section>
+      </main>
+    </section>
+  </div>
+
+  <script>
+    const baseConfig = {"years": [{"name": "Ano 1", "mapped": {"A": 3, "B": 10, "C": 1}, "conversion": {"A": 0.2, "B": 0.3, "C": 0.6}, "sales_headcount": {"senior": 1, "pleno": 0}, "sales_start_delay_months": 6, "closed": {"A": 0.6000000000000001, "B": 3.0, "C": 0.6}, "total_closed": 4.2}, {"name": "Ano 2", "mapped": {"A": 10, "B": 20, "C": 5}, "conversion": {"A": 0.2, "B": 0.3, "C": 0.6}, "sales_headcount": {"senior": 1, "pleno": 1}, "sales_start_delay_months": 0, "closed": {"A": 2.0, "B": 6.0, "C": 3.0}, "total_closed": 11.0}, {"name": "Ano 3", "mapped": {"A": 20, "B": 40, "C": 10}, "conversion": {"A": 0.2, "B": 0.3, "C": 0.6}, "sales_headcount": {"senior": 1, "pleno": 3}, "sales_start_delay_months": 0, "closed": {"A": 4.0, "B": 12.0, "C": 6.0}, "total_closed": 22.0}], "avg_arr": 300000, "resale_margin": {"A": 0.25, "B": 0.1, "C": 0.05}, "services_attach_rate": 0.5, "services_gross_margin": 0.4, "marketing_per_3_A_mapped": 10000, "seller_cost_monthly": {"senior_fixed": 10500, "senior_variable": 4500, "pleno_fixed": 7000, "pleno_variable": 3000}, "glean_payment_days": 30, "customer_collection_days": 45, "months_per_year": 12, "fx_rate": 5.4};
+
+    function deepClone(obj) {
+      return JSON.parse(JSON.stringify(obj));
+    }
+
+    let activeScenario = 'Base';
+
+    function money(v, fx = 1, suffix = 'USD') {
+      const value = v * fx;
+      const fmt = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
+      return (suffix === 'BRL' ? 'R$ ' : '$') + fmt.format(value);
+    }
+
+    function moneyShort(v) {
+      const abs = Math.abs(v);
+      const sign = v < 0 ? '-' : '';
+      if (abs >= 1000000) return sign + '$' + (abs / 1000000).toFixed(2) + 'M';
+      if (abs >= 1000) return sign + '$' + (abs / 1000).toFixed(0) + 'K';
+      return sign + '$' + abs.toFixed(0);
+    }
+
+    function pct(v) {
+      return (v * 100).toFixed(0) + '%';
+    }
+
+    function monthLabel(index) {
+      return 'M' + index;
+    }
+
+    function applyConfigToInputs(config) {
+      document.getElementById('avg_arr').value = config.avg_arr;
+      document.getElementById('fx_rate').value = config.fx_rate || 5.4;
+      document.getElementById('services_attach_rate').value = Math.round(config.services_attach_rate * 100);
+      document.getElementById('services_gross_margin').value = Math.round(config.services_gross_margin * 100);
+      document.getElementById('resale_margin_A').value = Math.round(config.resale_margin.A * 100);
+      document.getElementById('resale_margin_B').value = Math.round(config.resale_margin.B * 100);
+      document.getElementById('resale_margin_C').value = Math.round(config.resale_margin.C * 100);
+      document.getElementById('marketing_per_3_A_mapped').value = config.marketing_per_3_A_mapped;
+      document.getElementById('glean_payment_days').value = config.glean_payment_days;
+      document.getElementById('customer_collection_days').value = config.customer_collection_days;
+      document.getElementById('senior_fixed').value = config.seller_cost_monthly.senior_fixed;
+      document.getElementById('senior_variable').value = config.seller_cost_monthly.senior_variable;
+      document.getElementById('pleno_fixed').value = config.seller_cost_monthly.pleno_fixed;
+      document.getElementById('pleno_variable').value = config.seller_cost_monthly.pleno_variable;
+
+      config.years.forEach((year, idx) => {
+        const n = idx + 1;
+        document.getElementById(`y${n}_mapped_A`).value = year.mapped.A;
+        document.getElementById(`y${n}_mapped_B`).value = year.mapped.B;
+        document.getElementById(`y${n}_mapped_C`).value = year.mapped.C;
+        document.getElementById(`y${n}_conv_A`).value = Math.round(year.conversion.A * 100);
+        document.getElementById(`y${n}_conv_B`).value = Math.round(year.conversion.B * 100);
+        document.getElementById(`y${n}_conv_C`).value = Math.round(year.conversion.C * 100);
+        document.getElementById(`y${n}_senior`).value = year.sales_headcount.senior;
+        document.getElementById(`y${n}_pleno`).value = year.sales_headcount.pleno;
+        document.getElementById(`y${n}_delay`).value = year.sales_start_delay_months;
+      });
+    }
+
+    function getConfigFromInputs() {
+      const config = deepClone(baseConfig);
+      config.avg_arr = Number(document.getElementById('avg_arr').value || 0);
+      config.fx_rate = Number(document.getElementById('fx_rate').value || 5.4);
+      config.services_attach_rate = Number(document.getElementById('services_attach_rate').value || 0) / 100;
+      config.services_gross_margin = Number(document.getElementById('services_gross_margin').value || 0) / 100;
+      config.resale_margin.A = Number(document.getElementById('resale_margin_A').value || 0) / 100;
+      config.resale_margin.B = Number(document.getElementById('resale_margin_B').value || 0) / 100;
+      config.resale_margin.C = Number(document.getElementById('resale_margin_C').value || 0) / 100;
+      config.marketing_per_3_A_mapped = Number(document.getElementById('marketing_per_3_A_mapped').value || 0);
+      config.glean_payment_days = Number(document.getElementById('glean_payment_days').value || 0);
+      config.customer_collection_days = Number(document.getElementById('customer_collection_days').value || 0);
+      config.seller_cost_monthly.senior_fixed = Number(document.getElementById('senior_fixed').value || 0);
+      config.seller_cost_monthly.senior_variable = Number(document.getElementById('senior_variable').value || 0);
+      config.seller_cost_monthly.pleno_fixed = Number(document.getElementById('pleno_fixed').value || 0);
+      config.seller_cost_monthly.pleno_variable = Number(document.getElementById('pleno_variable').value || 0);
+
+      config.years.forEach((year, idx) => {
+        const n = idx + 1;
+        year.mapped.A = Number(document.getElementById(`y${n}_mapped_A`).value || 0);
+        year.mapped.B = Number(document.getElementById(`y${n}_mapped_B`).value || 0);
+        year.mapped.C = Number(document.getElementById(`y${n}_mapped_C`).value || 0);
+        year.conversion.A = Number(document.getElementById(`y${n}_conv_A`).value || 0) / 100;
+        year.conversion.B = Number(document.getElementById(`y${n}_conv_B`).value || 0) / 100;
+        year.conversion.C = Number(document.getElementById(`y${n}_conv_C`).value || 0) / 100;
+        year.sales_headcount.senior = Number(document.getElementById(`y${n}_senior`).value || 0);
+        year.sales_headcount.pleno = Number(document.getElementById(`y${n}_pleno`).value || 0);
+        year.sales_start_delay_months = Number(document.getElementById(`y${n}_delay`).value || 0);
+      });
+      return config;
+    }
+
+    function calculate(config) {
+      const monthly = [];
+      const annual = [];
+      let cumulative = 0;
+      let bridgePrev = 0;
+      let peakCashNeed = 0;
+      let peakMonth = 0;
+      let breakevenMonth = null;
+      const gapDays = Math.max(0, config.customer_collection_days - config.glean_payment_days);
+
+      config.years.forEach((year, yi) => {
+        const closed = {
+          A: year.mapped.A * year.conversion.A,
+          B: year.mapped.B * year.conversion.B,
+          C: year.mapped.C * year.conversion.C,
+        };
+        const totalClosed = closed.A + closed.B + closed.C;
+        const activeMonths = Math.max(0, 12 - year.sales_start_delay_months);
+        const fixedSalesMonth =
+          year.sales_headcount.senior * config.seller_cost_monthly.senior_fixed +
+          year.sales_headcount.pleno * config.seller_cost_monthly.pleno_fixed;
+        const variableSalesAnnual =
+          year.sales_headcount.senior * config.seller_cost_monthly.senior_variable * 12 +
+          year.sales_headcount.pleno * config.seller_cost_monthly.pleno_variable * 12;
+        const marketingAnnual = config.marketing_per_3_A_mapped * (year.mapped.A / 3);
+        const marketingMonth = marketingAnnual / 12;
+
+        const startIndex = monthly.length;
+        for (let m = 1; m <= 12; m++) {
+          const globalMonth = yi * 12 + m;
+          const active = m > year.sales_start_delay_months && activeMonths > 0;
+          const closeDist = {
+            A: active ? closed.A / activeMonths : 0,
+            B: active ? closed.B / activeMonths : 0,
+            C: active ? closed.C / activeMonths : 0,
+          };
+          const totalMonthClosed = closeDist.A + closeDist.B + closeDist.C;
+          const resaleGp =
+            closeDist.A * config.avg_arr * config.resale_margin.A +
+            closeDist.B * config.avg_arr * config.resale_margin.B +
+            closeDist.C * config.avg_arr * config.resale_margin.C;
+          const servicesGp = totalMonthClosed * config.avg_arr * config.services_attach_rate * config.services_gross_margin;
+          const grossProfit = resaleGp + servicesGp;
+          const licenseCogs =
+            closeDist.A * config.avg_arr * (1 - config.resale_margin.A) +
+            closeDist.B * config.avg_arr * (1 - config.resale_margin.B) +
+            closeDist.C * config.avg_arr * (1 - config.resale_margin.C);
+          const bridgeBalance = licenseCogs * (gapDays / 30);
+          const bridgeDelta = bridgeBalance - bridgePrev;
+          bridgePrev = bridgeBalance;
+          const variableSalesMonth = totalClosed > 0 ? variableSalesAnnual * (totalMonthClosed / totalClosed) : 0;
+          const monthlyCash = grossProfit - fixedSalesMonth - variableSalesMonth - marketingMonth - bridgeDelta;
+          cumulative += monthlyCash;
+          if (cumulative < peakCashNeed) {
+            peakCashNeed = cumulative;
+            peakMonth = globalMonth;
+          }
+          if (breakevenMonth === null && cumulative >= 0) breakevenMonth = globalMonth;
+          monthly.push({
+            monthIndex: globalMonth,
+            monthInYear: m,
+            year: year.name,
+            closedA: closeDist.A,
+            closedB: closeDist.B,
+            closedC: closeDist.C,
+            totalClosed: totalMonthClosed,
+            resaleGp,
+            servicesGp,
+            grossProfit,
+            fixedSales: fixedSalesMonth,
+            variableSales: variableSalesMonth,
+            marketing: marketingMonth,
+            licenseCogs,
+            bridgeBalance,
+            bridgeDelta,
+            monthlyCash,
+            cumulativeCash: cumulative,
+          });
+        }
+
+        const rows = monthly.slice(startIndex, startIndex + 12);
+        annual.push({
+          year: year.name,
+          totalClosed,
+          closed,
+          resaleGp: rows.reduce((a, r) => a + r.resaleGp, 0),
+          servicesGp: rows.reduce((a, r) => a + r.servicesGp, 0),
+          grossProfit: rows.reduce((a, r) => a + r.grossProfit, 0),
+          fixedSales: rows.reduce((a, r) => a + r.fixedSales, 0),
+          variableSales: rows.reduce((a, r) => a + r.variableSales, 0),
+          marketing: rows.reduce((a, r) => a + r.marketing, 0),
+          endingBridge: rows[rows.length - 1].bridgeBalance,
+          netCash: rows.reduce((a, r) => a + r.monthlyCash, 0),
+          endingCumulative: rows[rows.length - 1].cumulativeCash,
+        });
+      });
+
+      return {
+        monthly,
+        annual,
+        summary: {
+          breakevenMonth,
+          peakCashNeed: Math.abs(peakCashNeed),
+          peakMonth,
+          endingCumulative: cumulative,
+        },
+      };
+    }
+
+    function renderLineChart(container, seriesA, seriesB, options = {}) {
+      const width = container.clientWidth || 640;
+      const height = container.clientHeight || 300;
+      const pad = { top: 20, right: 20, bottom: 30, left: 56 };
+      const data = seriesB ? seriesA.concat(seriesB) : seriesA.slice();
+      const min = Math.min(...data, 0);
+      const max = Math.max(...data, 0);
+      const span = Math.max(1, max - min);
+      const x = i => pad.left + (i / Math.max(1, seriesA.length - 1)) * (width - pad.left - pad.right);
+      const y = v => pad.top + ((max - v) / span) * (height - pad.top - pad.bottom);
+
+      function pathFor(values) {
+        return values.map((v, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(2)} ${y(v).toFixed(2)}`).join(' ');
+      }
+
+      const zeroY = y(0);
+      let grid = '';
+      for (let i = 0; i < 5; i++) {
+        const gy = pad.top + (i / 4) * (height - pad.top - pad.bottom);
+        const val = max - (i / 4) * span;
+        grid += `<line x1="${pad.left}" y1="${gy}" x2="${width - pad.right}" y2="${gy}" stroke="var(--artifact-border-light)" stroke-width="1" />`;
+        grid += `<text x="${pad.left - 10}" y="${gy + 4}" text-anchor="end" fill="var(--artifact-text-secondary)" font-size="11">${moneyShort(val)}</text>`;
+      }
+      let xTicks = '';
+      [0, 5, 11, 17, 23, 29, 35].forEach(i => {
+        if (seriesA[i] === undefined) return;
+        xTicks += `<text x="${x(i)}" y="${height - 8}" text-anchor="middle" fill="var(--artifact-text-secondary)" font-size="11">M${i + 1}</text>`;
+      });
+
+      const areaPath = pathFor(seriesA) + ` L ${x(seriesA.length - 1).toFixed(2)} ${y(0).toFixed(2)} L ${x(0).toFixed(2)} ${y(0).toFixed(2)} Z`;
+      const secondary = seriesB ? `<path d="${pathFor(seriesB)}" fill="none" stroke="var(--artifact-chart-magenta)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />` : '';
+      const bars = options.bars ? options.bars.map((v, i) => {
+        const bw = Math.max(6, (width - pad.left - pad.right) / options.bars.length - 4);
+        const bx = x(i) - bw / 2;
+        const by = Math.min(y(v), zeroY);
+        const bh = Math.abs(y(v) - zeroY);
+        return `<rect x="${bx.toFixed(2)}" y="${by.toFixed(2)}" width="${bw.toFixed(2)}" height="${Math.max(1, bh).toFixed(2)}" rx="3" fill="var(--artifact-chart-olive)" opacity="0.85" />`;
+      }).join('') : '';
+
+      container.innerHTML = `
+        <svg width="100%" height="100%" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" role="img" aria-label="Chart">
+          <defs>
+            <linearGradient id="areaFill" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="var(--artifact-chart-indigo)" stop-opacity="0.28"></stop>
+              <stop offset="100%" stop-color="var(--artifact-chart-indigo)" stop-opacity="0.03"></stop>
+            </linearGradient>
+          </defs>
+          ${grid}
+          <line x1="${pad.left}" y1="${zeroY}" x2="${width - pad.right}" y2="${zeroY}" stroke="var(--artifact-chart-tangerine)" stroke-width="1.5" stroke-dasharray="5 5" />
+          <path d="${areaPath}" fill="url(#areaFill)"></path>
+          ${bars}
+          <path d="${pathFor(seriesA)}" fill="none" stroke="var(--artifact-chart-indigo)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+          ${secondary}
+          ${xTicks}
+        </svg>`;
+    }
+
+    function renderKPIs(result, config) {
+      const breakeven = result.summary.breakevenMonth ? 'M' + result.summary.breakevenMonth : 'No BE';
+      const peak = result.summary.peakCashNeed;
+      const year1 = result.annual[0];
+      const year3 = result.annual[2];
+      const cashGapBRL = peak * (config.fx_rate || 5.4);
+      const rows = [
+        { cls: 'warn', label: 'Breakeven month', value: breakeven, meta: 'Base case from current inputs' },
+        { cls: 'negative', label: 'Peak cash need', value: moneyShort(peak), meta: money(cashGapBRL / (config.fx_rate || 5.4), config.fx_rate || 5.4, 'BRL') + ' at current FX' },
+        { cls: 'positive', label: 'Year 1 net cash', value: moneyShort(year1.netCash), meta: 'After commercial spend and bridge build' },
+        { cls: 'positive', label: 'Year 3 net cash', value: moneyShort(year3.netCash), meta: 'Scale-year cash generation' },
+        { cls: 'positive', label: '36M cumulative', value: moneyShort(result.summary.endingCumulative), meta: 'Modeled ending cumulative cash' },
+      ];
+      document.getElementById('kpis').innerHTML = rows.map(r => `
+        <div class="kpi ${r.cls}">
+          <div class="label">${r.label}</div>
+          <div class="value">${r.value}</div>
+          <div class="meta">${r.meta}</div>
+        </div>`).join('');
+      document.getElementById('breakevenTag').textContent = `${activeScenario} scenario`;
+    }
+
+    function renderBridgeMini(result) {
+      const items = result.annual.map((row, idx) => `
+        <div class="mini-metric">
+          <div class="small">${row.year} closing bridge</div>
+          <div class="big">${moneyShort(row.endingBridge)}</div>
+          <div class="small">${row.totalClosed.toFixed(1)} closed customers</div>
+        </div>`).join('');
+      document.getElementById('bridgeMini').innerHTML = items;
+    }
+
+    function renderAnnualTable(result) {
+      const head = `
+        <tr>
+          <th>Year</th>
+          <th>Closed clients</th>
+          <th>Resale GP</th>
+          <th>Services GP</th>
+          <th>Gross profit</th>
+          <th>Sales fixed</th>
+          <th>Sales variable</th>
+          <th>Marketing</th>
+          <th>Bridge balance</th>
+          <th>Net cash</th>
+        </tr>`;
+      const body = result.annual.map(row => `
+        <tr>
+          <td>${row.year}</td>
+          <td>${row.totalClosed.toFixed(1)}</td>
+          <td>${money(row.resaleGp)}</td>
+          <td>${money(row.servicesGp)}</td>
+          <td>${money(row.grossProfit)}</td>
+          <td>${money(row.fixedSales)}</td>
+          <td>${money(row.variableSales)}</td>
+          <td>${money(row.marketing)}</td>
+          <td>${money(row.endingBridge)}</td>
+          <td>${money(row.netCash)}</td>
+        </tr>`).join('');
+      document.getElementById('annualTable').innerHTML = `<thead>${head}</thead><tbody>${body}</tbody>`;
+    }
+
+    function renderMonthlyTable(result) {
+      const head = `
+        <tr>
+          <th>Month</th>
+          <th>Year</th>
+          <th>Closed</th>
+          <th>Gross profit</th>
+          <th>Sales spend</th>
+          <th>Marketing</th>
+          <th>Bridge bal.</th>
+          <th>Monthly cash</th>
+          <th>Cumulative cash</th>
+        </tr>`;
+      const body = result.monthly.map(row => {
+        const cashClass = row.monthlyCash >= 0 ? 'pos' : 'neg';
+        const cumClass = row.cumulativeCash >= 0 ? 'pos' : 'neg';
+        const highlight = row.monthIndex === result.summary.breakevenMonth ? 'highlight' : '';
+        return `
+          <tr class="${highlight}">
+            <td>${monthLabel(row.monthIndex)}</td>
+            <td>${row.year}</td>
+            <td>${row.totalClosed.toFixed(2)}</td>
+            <td>${money(row.grossProfit)}</td>
+            <td>${money(row.fixedSales + row.variableSales)}</td>
+            <td>${money(row.marketing)}</td>
+            <td>${money(row.bridgeBalance)}</td>
+            <td class="${cashClass}">${money(row.monthlyCash)}</td>
+            <td class="${cumClass}">${money(row.cumulativeCash)}</td>
+          </tr>`;
+      }).join('');
+      document.getElementById('monthlyTable').innerHTML = `<thead>${head}</thead><tbody>${body}</tbody>`;
+    }
+
+    function renderNotes(config, result) {
+      const gap = Math.max(0, config.customer_collection_days - config.glean_payment_days);
+      document.getElementById('assumptionNote').innerHTML = `Model note: this version spreads closed deals evenly across each active year, applies the Year 1 ramp delay directly to the first year, and treats the working-capital bridge as the portion of license cost financed during the ${gap}-day collection gap. It preserves the document's logic of $${config.avg_arr.toLocaleString()} average ARR, ${(config.services_attach_rate * 100).toFixed(0)}% services attach, ${(config.services_gross_margin * 100).toFixed(0)}% services gross margin, and year-by-year A/B/C motion mix unless you change the controls.`;
+    }
+
+    function render(config) {
+      const result = calculate(config);
+      renderKPIs(result, config);
+      renderBridgeMini(result);
+      renderAnnualTable(result);
+      renderMonthlyTable(result);
+      renderNotes(config, result);
+      renderLineChart(
+        document.getElementById('cumChart'),
+        result.monthly.map(r => r.cumulativeCash)
+      );
+      renderLineChart(
+        document.getElementById('flowChart'),
+        result.monthly.map(r => r.bridgeBalance),
+        result.monthly.map(r => r.bridgeBalance),
+        { bars: result.monthly.map(r => r.monthlyCash) }
+      );
+    }
+
+    function baseScenario() {
+      activeScenario = 'Base';
+      const config = deepClone(baseConfig);
+      applyConfigToInputs(config);
+      render(config);
+    }
+
+    function conservativeScenario() {
+      activeScenario = 'Conservative';
+      const config = deepClone(baseConfig);
+      config.customer_collection_days = 60;
+      config.years[0].sales_start_delay_months = 8;
+      config.years.forEach((y, idx) => {
+        y.conversion.A *= 0.85;
+        y.conversion.B *= 0.9;
+        y.conversion.C *= 0.95;
+        if (idx === 0) y.mapped.A += 1;
+      });
+      config.services_gross_margin = Math.max(0.25, config.services_gross_margin - 0.05);
+      applyConfigToInputs(config);
+      render(config);
+    }
+
+    function aggressiveScenario() {
+      activeScenario = 'Aggressive';
+      const config = deepClone(baseConfig);
+      config.customer_collection_days = 35;
+      config.years[0].sales_start_delay_months = 5;
+      config.years.forEach(y => {
+        y.conversion.A *= 1.15;
+        y.conversion.B *= 1.10;
+        y.conversion.C *= 1.05;
+      });
+      config.services_attach_rate = Math.min(0.7, config.services_attach_rate + 0.1);
+      applyConfigToInputs(config);
+      render(config);
+    }
+
+    function init() {
+      const config = deepClone(baseConfig);
+      config.fx_rate = 5.4;
+      applyConfigToInputs(config);
+      render(config);
+      document.querySelectorAll('input').forEach(el => el.addEventListener('input', () => {
+        activeScenario = 'Custom';
+        render(getConfigFromInputs());
+      }));
+      document.getElementById('baseBtn').addEventListener('click', baseScenario);
+      document.getElementById('consBtn').addEventListener('click', conservativeScenario);
+      document.getElementById('aggBtn').addEventListener('click', aggressiveScenario);
+      window.addEventListener('resize', () => render(getConfigFromInputs()));
+    }
+
+    init();
+  </script>
+
+  <script>
+    window.GleanBridge.postMessage({
+      actionId: 'export-pdf',
+      type: 'glean-add-menu',
+      metadata: { label: 'Export as PDF', icon: 'export' }
+    });
+    window.GleanBridge.onMessage('action', function(data) {
+      if (data.actionId === 'export-pdf') window.print();
+    });
+
+    function prepareChartsForPrint() {
+      document.querySelectorAll('[_echarts_instance_]').forEach(function(el) {
+        var chart = echarts.getInstanceByDom(el);
+        if (!chart) return;
+        var img = new Image();
+        img.src = chart.getDataURL({ type: 'png', pixelRatio: 2 });
+        img.className = 'print-chart-img';
+        img.style.cssText =
+          'width:100%;height:100%;object-fit:contain;' +
+          'position:absolute;top:0;left:0;z-index:10;';
+        el.dataset.prevPosition = el.style.position;
+        el.style.position = 'relative';
+        el.appendChild(img);
+      });
+    }
+
+    function cleanUpAfterPrint() {
+      document.querySelectorAll('[_echarts_instance_]').forEach(function(el) {
+        var img = el.querySelector('.print-chart-img');
+        if (!img) return;
+        img.remove();
+        el.style.position = el.dataset.prevPosition || '';
+        delete el.dataset.prevPosition;
+      });
+    }
+
+    window.addEventListener('beforeprint', prepareChartsForPrint);
+    window.addEventListener('afterprint', cleanUpAfterPrint);
+  </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brazil Partner Plan Simulator</title>
+  <style>
+    :root {
+      --artifact-background: var(--theme-background, #ffffff);
+      --artifact-background-light: var(--theme-background-light, #f6f6f6);
+      --artifact-background-mid: var(--theme-background-mid, #f0f0f0);
+      --artifact-border-light: var(--theme-border-light, #e5e5e5);
+      --artifact-border-dark: var(--theme-border-dark, #cccccc);
+      --artifact-primary-brand: var(--theme-primary-brand, #343ced);
+      --artifact-primary-highlight: var(--theme-primary-highlight, #1b1b1b);
+      --artifact-primary-hover: var(--theme-primary-hover, #404040);
+      --artifact-selected: var(--theme-selected, #e8e8e8);
+      --artifact-text-primary: var(--theme-text-primary, #1b1b1b);
+      --artifact-text-secondary: var(--theme-text-secondary, #727272);
+      --artifact-text-highlight: var(--theme-text-highlight, #fff8e5);
+      --artifact-chart-indigo: #343ced;
+      --artifact-chart-indigo-soft: #dfe2ff;
+      --artifact-chart-olive: #82951e;
+      --artifact-chart-olive-soft: #edf4d1;
+      --artifact-chart-tangerine: #ef601b;
+      --artifact-chart-tangerine-soft: #ffe4d6;
+      --artifact-chart-magenta: #dd2ca5;
+      --artifact-chart-magenta-soft: #ffd9f2;
+      --artifact-positive-background: #e9f7ef;
+      --artifact-positive-text: #1b1b1b;
+      --artifact-negative-background: #fdeaea;
+      --artifact-negative-text: #1b1b1b;
+      --artifact-warn-background: #fff3dd;
+      --artifact-warn-text: #1b1b1b;
+      --artifact-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+    }
+    html[data-theme='dark'] {
+      --artifact-chart-indigo-soft: #1e246e;
+      --artifact-chart-olive-soft: #2e3912;
+      --artifact-chart-tangerine-soft: #5d2510;
+      --artifact-chart-magenta-soft: #59203f;
+      --artifact-positive-background: #12351f;
+      --artifact-positive-text: #d8f5df;
+      --artifact-negative-background: #4d1717;
+      --artifact-negative-text: #ffd8d8;
+      --artifact-warn-background: #4a3313;
+      --artifact-warn-text: #ffe6c2;
+      --artifact-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--artifact-background);
+      color: var(--artifact-text-primary);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .shell {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .hero {
+      background: linear-gradient(135deg, var(--artifact-background-light), var(--artifact-background));
+      border: 1px solid var(--artifact-border-light);
+      border-radius: 22px;
+      padding: 28px;
+      box-shadow: var(--artifact-shadow);
+      margin-bottom: 20px;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--artifact-chart-indigo-soft);
+      color: var(--artifact-text-primary);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 14px 0 10px;
+      font-size: clamp(30px, 4vw, 46px);
+      line-height: 1.05;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+    .subhead {
+      max-width: 920px;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--artifact-text-secondary);
+      margin: 0;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+    .panel {
+      background: var(--artifact-background);
+      border: 1px solid var(--artifact-border-light);
+      border-radius: 20px;
+      box-shadow: var(--artifact-shadow);
+    }
+    .controls {
+      position: sticky;
+      top: 18px;
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+    .section-card {
+      background: var(--artifact-background-light);
+      border: 1px solid var(--artifact-border-light);
+      border-radius: 16px;
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .section-note {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--artifact-text-secondary);
+    }
+    .grid-2, .grid-3 {
+      display: grid;
+      gap: 10px;
+    }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    label {
+      display: grid;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--artifact-text-secondary);
+      font-weight: 600;
+    }
+    input {
+      width: 100%;
+      border: 1px solid var(--artifact-border-dark);
+      background: var(--artifact-background);
+      color: var(--artifact-text-primary);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+    }
+    input:hover { border-color: var(--artifact-primary-highlight); }
+    input:focus {
+      border-color: var(--artifact-primary-brand);
+      background: var(--artifact-background-light);
+      transform: translateY(-1px);
+    }
+    .button-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+    button {
+      border: 1px solid var(--artifact-border-dark);
+      background: var(--artifact-background);
+      color: var(--artifact-text-primary);
+      border-radius: 12px;
+      padding: 11px 12px;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+    }
+    button:hover {
+      transform: translateY(-1px);
+      border-color: var(--artifact-primary-highlight);
+      background: var(--artifact-background-light);
+    }
+    button.primary {
+      background: var(--artifact-primary-highlight);
+      color: var(--artifact-background);
+      border-color: var(--artifact-primary-highlight);
+    }
+    button.primary:hover {
+      background: var(--artifact-primary-hover);
+      border-color: var(--artifact-primary-hover);
+    }
+    .content {
+      display: grid;
+      gap: 18px;
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .kpi {
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px solid var(--artifact-border-light);
+      background: var(--artifact-background);
+      box-shadow: var(--artifact-shadow);
+      min-height: 112px;
+    }
+    .kpi .label {
+      font-size: 12px;
+      color: var(--artifact-text-secondary);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 700;
+    }
+    .kpi .value {
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+    }
+    .kpi .meta {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--artifact-text-secondary);
+      line-height: 1.4;
+    }
+    .kpi.negative { background: var(--artifact-negative-background); color: var(--artifact-negative-text); }
+    .kpi.positive { background: var(--artifact-positive-background); color: var(--artifact-positive-text); }
+    .kpi.warn { background: var(--artifact-warn-background); color: var(--artifact-warn-text); }
+    .stack {
+      display: grid;
+      gap: 18px;
+      padding: 18px;
+    }
+    .stack-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 14px;
+      margin-bottom: 4px;
+    }
+    .stack-head h2 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.15;
+    }
+    .stack-head p {
+      margin: 0;
+      color: var(--artifact-text-secondary);
+      font-size: 13px;
+      line-height: 1.5;
+      max-width: 620px;
+    }
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 16px;
+    }
+    .chart-card, .table-card {
+      background: var(--artifact-background-light);
+      border: 1px solid var(--artifact-border-light);
+      border-radius: 18px;
+      padding: 16px;
+    }
+    .chart-wrap {
+      height: 320px;
+      position: relative;
+      overflow: hidden;
+    }
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .mini-metric {
+      background: var(--artifact-background);
+      border: 1px solid var(--artifact-border-light);
+      border-radius: 16px;
+      padding: 14px;
+    }
+    .mini-metric .small { font-size: 12px; color: var(--artifact-text-secondary); margin-bottom: 8px; }
+    .mini-metric .big { font-size: 22px; font-weight: 800; letter-spacing: -0.03em; }
+    .annual-table, .monthly-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .annual-table th, .annual-table td,
+    .monthly-table th, .monthly-table td {
+      padding: 11px 10px;
+      border-bottom: 1px solid var(--artifact-border-light);
+      text-align: right;
+      vertical-align: top;
+    }
+    .annual-table th:first-child, .annual-table td:first-child,
+    .monthly-table th:first-child, .monthly-table td:first-child { text-align: left; }
+    .annual-table th, .monthly-table th {
+      color: var(--artifact-text-secondary);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      position: sticky;
+      top: 0;
+      background: var(--artifact-background-light);
+      z-index: 2;
+    }
+    .monthly-wrap {
+      max-height: 430px;
+      overflow: auto;
+      border-radius: 14px;
+      border: 1px solid var(--artifact-border-light);
+      background: var(--artifact-background);
+    }
+    .monthly-table .neg { color: var(--artifact-chart-tangerine); font-weight: 700; }
+    .monthly-table .pos { color: var(--artifact-chart-olive); font-weight: 700; }
+    .monthly-table tr.highlight td { background: var(--artifact-chart-indigo-soft); }
+    .insight-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .insight {
+      border: 1px solid var(--artifact-border-light);
+      border-radius: 18px;
+      background: var(--artifact-background-light);
+      padding: 16px;
+    }
+    .insight h3 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      line-height: 1.2;
+    }
+    .insight ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--artifact-text-secondary);
+      line-height: 1.65;
+      font-size: 14px;
+    }
+    .footnote {
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: var(--artifact-background-light);
+      border: 1px solid var(--artifact-border-light);
+      color: var(--artifact-text-secondary);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 8px;
+      color: var(--artifact-text-secondary);
+      font-size: 12px;
+    }
+    .legend span { display: inline-flex; align-items: center; gap: 8px; }
+    .dot {
+      width: 10px; height: 10px; border-radius: 999px; display: inline-block;
+      background: var(--artifact-chart-indigo);
+    }
+    .dot.orange { background: var(--artifact-chart-tangerine); }
+    .dot.green { background: var(--artifact-chart-olive); }
+    .dot.magenta { background: var(--artifact-chart-magenta); }
+    .divider {
+      height: 1px;
+      background: var(--artifact-border-light);
+      margin: 4px 0;
+    }
+    .tag {
+      display: inline-flex;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--artifact-selected);
+      color: var(--artifact-text-primary);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    @media screen and (max-width: 1180px) {
+      .layout { grid-template-columns: 1fr; }
+      .controls { position: static; }
+      .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .chart-grid, .insight-grid, .mini-grid { grid-template-columns: 1fr; }
+    }
+    @media screen and (max-width: 720px) {
+      .shell { padding: 14px; }
+      .hero { padding: 20px; }
+      .kpi-grid, .grid-2, .grid-3, .button-row { grid-template-columns: 1fr; }
+    }
+    @media print {
+      body {
+        margin: 0;
+        padding: 0.4in 0.6in;
+        background: #fff;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+      .container, .dashboard, .shell, main {
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+      [style*="position:sticky"], [style*="position: sticky"],
+      [class*="topbar"], [class*="navbar"], [class*="header"][class*="sticky"] {
+        position: static !important;
+      }
+      section, [class*="section"], .header {
+        break-inside: avoid;
+        margin-bottom: 20px !important;
+      }
+      [class*="card"], [class*="Card"] {
+        break-inside: avoid;
+        padding: 18px !important;
+        box-shadow: none !important;
+        border: 1px solid rgba(0,0,0,0.08);
+      }
+      [class*="grid"], [class*="row"] {
+        gap: 10px !important;
+        margin-bottom: 20px !important;
+      }
+      [class*="chart"], [class*="Chart"] {
+        break-inside: avoid;
+        height: 240px !important;
+      }
+      [class*="chart"][class*="tall"], [class*="Chart"][class*="tall"],
+      [class*="chart"][class*="full"], [class*="Chart"][class*="full"] {
+        height: 280px !important;
+      }
+      table, thead, .funnel, .heatmap, .list, .goals { break-inside: avoid; }
+      [class*="quote-list"], [class*="scroll"], [style*="max-height"], [style*="overflow"] {
+        max-height: none !important;
+        overflow: visible !important;
+      }
+      [class*="tab-panel"], [class*="tabpanel"] { display: block !important; }
+      [class*="tab-bar"], [class*="tabs"]:not([class*="panel"]) { display: none !important; }
+      [class*="fade"], [class*="animate"], [class*="slide"] {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+      button, [role="button"], .interactive-only { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero">
+      <div class="eyebrow">Brazil partner plan simulator</div>
+      <h1>Interactive plan, cash ramp, and breakeven model</h1>
+      <p class="subhead">This artifact translates the plan into a working model you can stress-test. Adjust deal mix, conversion, margins, payment terms, hiring, and working-capital assumptions to see month-by-month cash needs, breakeven timing, and the scale of the funding bridge.</p>
+    </section>
+
+    <section class="layout">
+      <aside class="panel controls">
+        <div class="section-card">
+          <h3 class="section-title">Scenario presets <span class="tag">1 click</span></h3>
+          <div class="button-row">
+            <button class="primary" id="baseBtn">Base</button>
+            <button id="consBtn">Conservative</button>
+            <button id="aggBtn">Aggressive</button>
+          </div>
+          <p class="section-note">Base uses the document assumptions. Conservative lowers conversion and stretches cash terms. Aggressive improves execution and collections.</p>
+        </div>
+
+        <div class="section-card">
+          <h3 class="section-title">Core economics</h3>
+          <div class="grid-2">
+            <label>Average ARR (USD)
+              <input id="avg_arr" type="number" step="10000" />
+            </label>
+            <label>FX USD→BRL
+              <input id="fx_rate" type="number" step="0.01" />
+            </label>
+            <label>Services attach rate (%)
+              <input id="services_attach_rate" type="number" step="1" />
+            </label>
+            <label>Services gross margin (%)
+              <input id="services_gross_margin" type="number" step="1" />
+            </label>
+            <label>Resale margin A (%)
+              <input id="resale_margin_A" type="number" step="1" />
+            </label>
+            <label>Resale margin B (%)
+              <input id="resale_margin_B" type="number" step="1" />
+            </label>
+            <label>Resale margin C (%)
+              <input id="resale_margin_C" type="number" step="1" />
+            </label>
+            <label>Marketing per 3 A leads (USD)
+              <input id="marketing_per_3_A_mapped" type="number" step="1000" />
+            </label>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h3 class="section-title">Cash timing and sales-cost structure</h3>
+          <div class="grid-2">
+            <label>Glean payment days
+              <input id="glean_payment_days" type="number" step="1" />
+            </label>
+            <label>Customer collection days
+              <input id="customer_collection_days" type="number" step="1" />
+            </label>
+            <label>Senior fixed / month (USD)
+              <input id="senior_fixed" type="number" step="500" />
+            </label>
+            <label>Senior variable / month (USD)
+              <input id="senior_variable" type="number" step="500" />
+            </label>
+            <label>Pleno fixed / month (USD)
+              <input id="pleno_fixed" type="number" step="500" />
+            </label>
+            <label>Pleno variable / month (USD)
+              <input id="pleno_variable" type="number" step="500" />
+            </label>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h3 class="section-title">Year 1 commercial ramp</h3>
+          <div class="grid-3">
+            <label>Mapped A
+              <input id="y1_mapped_A" type="number" step="1" />
+            </label>
+            <label>Mapped B
+              <input id="y1_mapped_B" type="number" step="1" />
+            </label>
+            <label>Mapped C
+              <input id="y1_mapped_C" type="number" step="1" />
+            </label>
+            <label>Conv. A (%)
+              <input id="y1_conv_A" type="number" step="1" />
+            </label>
+            <label>Conv. B (%)
+              <input id="y1_conv_B" type="number" step="1" />
+            </label>
+            <label>Conv. C (%)
+              <input id="y1_conv_C" type="number" step="1" />
+            </label>
+            <label>Senior HC
+              <input id="y1_senior" type="number" step="1" />
+            </label>
+            <label>Pleno HC
+              <input id="y1_pleno" type="number" step="1" />
+            </label>
+            <label>Delay months
+              <input id="y1_delay" type="number" step="1" />
+            </label>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h3 class="section-title">Year 2 scale-up</h3>
+          <div class="grid-3">
+            <label>Mapped A
+              <input id="y2_mapped_A" type="number" step="1" />
+            </label>
+            <label>Mapped B
+              <input id="y2_mapped_B" type="number" step="1" />
+            </label>
+            <label>Mapped C
+              <input id="y2_mapped_C" type="number" step="1" />
+            </label>
+            <label>Conv. A (%)
+              <input id="y2_conv_A" type="number" step="1" />
+            </label>
+            <label>Conv. B (%)
+              <input id="y2_conv_B" type="number" step="1" />
+            </label>
+            <label>Conv. C (%)
+              <input id="y2_conv_C" type="number" step="1" />
+            </label>
+            <label>Senior HC
+              <input id="y2_senior" type="number" step="1" />
+            </label>
+            <label>Pleno HC
+              <input id="y2_pleno" type="number" step="1" />
+            </label>
+            <label>Delay months
+              <input id="y2_delay" type="number" step="1" />
+            </label>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h3 class="section-title">Year 3 scale-up</h3>
+          <div class="grid-3">
+            <label>Mapped A
+              <input id="y3_mapped_A" type="number" step="1" />
+            </label>
+            <label>Mapped B
+              <input id="y3_mapped_B" type="number" step="1" />
+            </label>
+            <label>Mapped C
+              <input id="y3_mapped_C" type="number" step="1" />
+            </label>
+            <label>Conv. A (%)
+              <input id="y3_conv_A" type="number" step="1" />
+            </label>
+            <label>Conv. B (%)
+              <input id="y3_conv_B" type="number" step="1" />
+            </label>
+            <label>Conv. C (%)
+              <input id="y3_conv_C" type="number" step="1" />
+            </label>
+            <label>Senior HC
+              <input id="y3_senior" type="number" step="1" />
+            </label>
+            <label>Pleno HC
+              <input id="y3_pleno" type="number" step="1" />
+            </label>
+            <label>Delay months
+              <input id="y3_delay" type="number" step="1" />
+            </label>
+          </div>
+        </div>
+      </aside>
+
+      <main class="content">
+        <section class="kpi-grid" id="kpis"></section>
+
+        <section class="panel stack">
+          <div class="stack-head">
+            <div>
+              <h2>Cash ramp and breakeven</h2>
+              <p>Peak cash need is the maximum cumulative funding gap from day 1. Breakeven is the first month when cumulative cash turns positive under the current assumptions.</p>
+            </div>
+            <div class="tag" id="breakevenTag">Base case</div>
+          </div>
+          <div class="chart-grid">
+            <div class="chart-card">
+              <div class="section-title">Cumulative cash by month</div>
+              <div class="chart-wrap" id="cumChart"></div>
+              <div class="legend">
+                <span><i class="dot"></i>Cumulative cash</span>
+                <span><i class="dot orange"></i>Zero line</span>
+              </div>
+            </div>
+            <div class="chart-card">
+              <div class="section-title">Monthly cash and working-capital bridge</div>
+              <div class="chart-wrap" id="flowChart"></div>
+              <div class="legend">
+                <span><i class="dot green"></i>Monthly cash</span>
+                <span><i class="dot"></i>Bridge balance</span>
+              </div>
+            </div>
+          </div>
+          <div class="mini-grid" id="bridgeMini"></div>
+        </section>
+
+        <section class="panel stack">
+          <div class="stack-head">
+            <div>
+              <h2>Annual operating view</h2>
+              <p>This keeps the original plan logic visible while showing the cash overlay and the bridge tied to D+30 versus D+45.</p>
+            </div>
+          </div>
+          <div class="table-card">
+            <table class="annual-table" id="annualTable"></table>
+          </div>
+        </section>
+
+        <section class="panel stack">
+          <div class="stack-head">
+            <div>
+              <h2>Month-by-month investment requirement</h2>
+              <p>The highlighted row marks the modeled breakeven month. Negative cumulative cash shows how much funding is still required at that point in time.</p>
+            </div>
+          </div>
+          <div class="monthly-wrap">
+            <table class="monthly-table" id="monthlyTable"></table>
+          </div>
+        </section>
+
+        <section class="panel stack">
+          <div class="stack-head">
+            <div>
+              <h2>Evaluation and recommended complements</h2>
+              <p>The original plan is economically attractive, but these additions make it more investor-ready and operationally safer for Brazil execution.</p>
+            </div>
+          </div>
+          <div class="insight-grid">
+            <div class="insight">
+              <h3>What is already strong</h3>
+              <ul>
+                <li>Dual engine of resale margin plus high-margin services.</li>
+                <li>Deal mix intentionally migrates from co-sell to partner-originated revenue.</li>
+                <li>Working-capital gap is short enough to be financeable.</li>
+                <li>Commercial headcount ramp is disciplined versus target volume.</li>
+              </ul>
+            </div>
+            <div class="insight">
+              <h3>What is missing from the plan</h3>
+              <ul>
+                <li>G&amp;A, taxes, legal, and entity setup costs for Brazil are not yet layered in.</li>
+                <li>No delivery-capacity model validates the 40% services margin at scale.</li>
+                <li>No churn, renewal, or expansion assumptions support long-term channel value.</li>
+                <li>No FX protection or credit policy is defined despite a Brazil operating context.</li>
+              </ul>
+            </div>
+            <div class="insight">
+              <h3>Best complements to add</h3>
+              <ul>
+                <li>Add quarterly pipeline-coverage targets by motion A, B, and C.</li>
+                <li>Add a services utilization plan by role and expected delivery mix.</li>
+                <li>Add a credit-line policy sized to the bridge shown in this model plus contingency.</li>
+                <li>Add enablement milestones, reference wins, and renewal-governance checkpoints.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="footnote" id="assumptionNote"></div>
+        </section>
+      </main>
+    </section>
+  </div>
+
+  <script>
+    const baseConfig = {"years": [{"name": "Ano 1", "mapped": {"A": 3, "B": 10, "C": 1}, "conversion": {"A": 0.2, "B": 0.3, "C": 0.6}, "sales_headcount": {"senior": 1, "pleno": 0}, "sales_start_delay_months": 6, "closed": {"A": 0.6000000000000001, "B": 3.0, "C": 0.6}, "total_closed": 4.2}, {"name": "Ano 2", "mapped": {"A": 10, "B": 20, "C": 5}, "conversion": {"A": 0.2, "B": 0.3, "C": 0.6}, "sales_headcount": {"senior": 1, "pleno": 1}, "sales_start_delay_months": 0, "closed": {"A": 2.0, "B": 6.0, "C": 3.0}, "total_closed": 11.0}, {"name": "Ano 3", "mapped": {"A": 20, "B": 40, "C": 10}, "conversion": {"A": 0.2, "B": 0.3, "C": 0.6}, "sales_headcount": {"senior": 1, "pleno": 3}, "sales_start_delay_months": 0, "closed": {"A": 4.0, "B": 12.0, "C": 6.0}, "total_closed": 22.0}], "avg_arr": 300000, "resale_margin": {"A": 0.25, "B": 0.1, "C": 0.05}, "services_attach_rate": 0.5, "services_gross_margin": 0.4, "marketing_per_3_A_mapped": 10000, "seller_cost_monthly": {"senior_fixed": 10500, "senior_variable": 4500, "pleno_fixed": 7000, "pleno_variable": 3000}, "glean_payment_days": 30, "customer_collection_days": 45, "months_per_year": 12, "fx_rate": 5.4};
+
+    function deepClone(obj) {
+      return JSON.parse(JSON.stringify(obj));
+    }
+
+    let activeScenario = 'Base';
+
+    function money(v, fx = 1, suffix = 'USD') {
+      const value = v * fx;
+      const fmt = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
+      return (suffix === 'BRL' ? 'R$ ' : '$') + fmt.format(value);
+    }
+
+    function moneyShort(v) {
+      const abs = Math.abs(v);
+      const sign = v < 0 ? '-' : '';
+      if (abs >= 1000000) return sign + '$' + (abs / 1000000).toFixed(2) + 'M';
+      if (abs >= 1000) return sign + '$' + (abs / 1000).toFixed(0) + 'K';
+      return sign + '$' + abs.toFixed(0);
+    }
+
+    function pct(v) {
+      return (v * 100).toFixed(0) + '%';
+    }
+
+    function monthLabel(index) {
+      return 'M' + index;
+    }
+
+    function applyConfigToInputs(config) {
+      document.getElementById('avg_arr').value = config.avg_arr;
+      document.getElementById('fx_rate').value = config.fx_rate || 5.4;
+      document.getElementById('services_attach_rate').value = Math.round(config.services_attach_rate * 100);
+      document.getElementById('services_gross_margin').value = Math.round(config.services_gross_margin * 100);
+      document.getElementById('resale_margin_A').value = Math.round(config.resale_margin.A * 100);
+      document.getElementById('resale_margin_B').value = Math.round(config.resale_margin.B * 100);
+      document.getElementById('resale_margin_C').value = Math.round(config.resale_margin.C * 100);
+      document.getElementById('marketing_per_3_A_mapped').value = config.marketing_per_3_A_mapped;
+      document.getElementById('glean_payment_days').value = config.glean_payment_days;
+      document.getElementById('customer_collection_days').value = config.customer_collection_days;
+      document.getElementById('senior_fixed').value = config.seller_cost_monthly.senior_fixed;
+      document.getElementById('senior_variable').value = config.seller_cost_monthly.senior_variable;
+      document.getElementById('pleno_fixed').value = config.seller_cost_monthly.pleno_fixed;
+      document.getElementById('pleno_variable').value = config.seller_cost_monthly.pleno_variable;
+
+      config.years.forEach((year, idx) => {
+        const n = idx + 1;
+        document.getElementById(`y${n}_mapped_A`).value = year.mapped.A;
+        document.getElementById(`y${n}_mapped_B`).value = year.mapped.B;
+        document.getElementById(`y${n}_mapped_C`).value = year.mapped.C;
+        document.getElementById(`y${n}_conv_A`).value = Math.round(year.conversion.A * 100);
+        document.getElementById(`y${n}_conv_B`).value = Math.round(year.conversion.B * 100);
+        document.getElementById(`y${n}_conv_C`).value = Math.round(year.conversion.C * 100);
+        document.getElementById(`y${n}_senior`).value = year.sales_headcount.senior;
+        document.getElementById(`y${n}_pleno`).value = year.sales_headcount.pleno;
+        document.getElementById(`y${n}_delay`).value = year.sales_start_delay_months;
+      });
+    }
+
+    function getConfigFromInputs() {
+      const config = deepClone(baseConfig);
+      config.avg_arr = Number(document.getElementById('avg_arr').value || 0);
+      config.fx_rate = Number(document.getElementById('fx_rate').value || 5.4);
+      config.services_attach_rate = Number(document.getElementById('services_attach_rate').value || 0) / 100;
+      config.services_gross_margin = Number(document.getElementById('services_gross_margin').value || 0) / 100;
+      config.resale_margin.A = Number(document.getElementById('resale_margin_A').value || 0) / 100;
+      config.resale_margin.B = Number(document.getElementById('resale_margin_B').value || 0) / 100;
+      config.resale_margin.C = Number(document.getElementById('resale_margin_C').value || 0) / 100;
+      config.marketing_per_3_A_mapped = Number(document.getElementById('marketing_per_3_A_mapped').value || 0);
+      config.glean_payment_days = Number(document.getElementById('glean_payment_days').value || 0);
+      config.customer_collection_days = Number(document.getElementById('customer_collection_days').value || 0);
+      config.seller_cost_monthly.senior_fixed = Number(document.getElementById('senior_fixed').value || 0);
+      config.seller_cost_monthly.senior_variable = Number(document.getElementById('senior_variable').value || 0);
+      config.seller_cost_monthly.pleno_fixed = Number(document.getElementById('pleno_fixed').value || 0);
+      config.seller_cost_monthly.pleno_variable = Number(document.getElementById('pleno_variable').value || 0);
+
+      config.years.forEach((year, idx) => {
+        const n = idx + 1;
+        year.mapped.A = Number(document.getElementById(`y${n}_mapped_A`).value || 0);
+        year.mapped.B = Number(document.getElementById(`y${n}_mapped_B`).value || 0);
+        year.mapped.C = Number(document.getElementById(`y${n}_mapped_C`).value || 0);
+        year.conversion.A = Number(document.getElementById(`y${n}_conv_A`).value || 0) / 100;
+        year.conversion.B = Number(document.getElementById(`y${n}_conv_B`).value || 0) / 100;
+        year.conversion.C = Number(document.getElementById(`y${n}_conv_C`).value || 0) / 100;
+        year.sales_headcount.senior = Number(document.getElementById(`y${n}_senior`).value || 0);
+        year.sales_headcount.pleno = Number(document.getElementById(`y${n}_pleno`).value || 0);
+        year.sales_start_delay_months = Number(document.getElementById(`y${n}_delay`).value || 0);
+      });
+      return config;
+    }
+
+    function calculate(config) {
+      const monthly = [];
+      const annual = [];
+      let cumulative = 0;
+      let bridgePrev = 0;
+      let peakCashNeed = 0;
+      let peakMonth = 0;
+      let breakevenMonth = null;
+      const gapDays = Math.max(0, config.customer_collection_days - config.glean_payment_days);
+
+      config.years.forEach((year, yi) => {
+        const closed = {
+          A: year.mapped.A * year.conversion.A,
+          B: year.mapped.B * year.conversion.B,
+          C: year.mapped.C * year.conversion.C,
+        };
+        const totalClosed = closed.A + closed.B + closed.C;
+        const activeMonths = Math.max(0, 12 - year.sales_start_delay_months);
+        const fixedSalesMonth =
+          year.sales_headcount.senior * config.seller_cost_monthly.senior_fixed +
+          year.sales_headcount.pleno * config.seller_cost_monthly.pleno_fixed;
+        const variableSalesAnnual =
+          year.sales_headcount.senior * config.seller_cost_monthly.senior_variable * 12 +
+          year.sales_headcount.pleno * config.seller_cost_monthly.pleno_variable * 12;
+        const marketingAnnual = config.marketing_per_3_A_mapped * (year.mapped.A / 3);
+        const marketingMonth = marketingAnnual / 12;
+
+        const startIndex = monthly.length;
+        for (let m = 1; m <= 12; m++) {
+          const globalMonth = yi * 12 + m;
+          const active = m > year.sales_start_delay_months && activeMonths > 0;
+          const closeDist = {
+            A: active ? closed.A / activeMonths : 0,
+            B: active ? closed.B / activeMonths : 0,
+            C: active ? closed.C / activeMonths : 0,
+          };
+          const totalMonthClosed = closeDist.A + closeDist.B + closeDist.C;
+          const resaleGp =
+            closeDist.A * config.avg_arr * config.resale_margin.A +
+            closeDist.B * config.avg_arr * config.resale_margin.B +
+            closeDist.C * config.avg_arr * config.resale_margin.C;
+          const servicesGp = totalMonthClosed * config.avg_arr * config.services_attach_rate * config.services_gross_margin;
+          const grossProfit = resaleGp + servicesGp;
+          const licenseCogs =
+            closeDist.A * config.avg_arr * (1 - config.resale_margin.A) +
+            closeDist.B * config.avg_arr * (1 - config.resale_margin.B) +
+            closeDist.C * config.avg_arr * (1 - config.resale_margin.C);
+          const bridgeBalance = licenseCogs * (gapDays / 30);
+          const bridgeDelta = bridgeBalance - bridgePrev;
+          bridgePrev = bridgeBalance;
+          const variableSalesMonth = totalClosed > 0 ? variableSalesAnnual * (totalMonthClosed / totalClosed) : 0;
+          const monthlyCash = grossProfit - fixedSalesMonth - variableSalesMonth - marketingMonth - bridgeDelta;
+          cumulative += monthlyCash;
+          if (cumulative < peakCashNeed) {
+            peakCashNeed = cumulative;
+            peakMonth = globalMonth;
+          }
+          if (breakevenMonth === null && cumulative >= 0) breakevenMonth = globalMonth;
+          monthly.push({
+            monthIndex: globalMonth,
+            monthInYear: m,
+            year: year.name,
+            closedA: closeDist.A,
+            closedB: closeDist.B,
+            closedC: closeDist.C,
+            totalClosed: totalMonthClosed,
+            resaleGp,
+            servicesGp,
+            grossProfit,
+            fixedSales: fixedSalesMonth,
+            variableSales: variableSalesMonth,
+            marketing: marketingMonth,
+            licenseCogs,
+            bridgeBalance,
+            bridgeDelta,
+            monthlyCash,
+            cumulativeCash: cumulative,
+          });
+        }
+
+        const rows = monthly.slice(startIndex, startIndex + 12);
+        annual.push({
+          year: year.name,
+          totalClosed,
+          closed,
+          resaleGp: rows.reduce((a, r) => a + r.resaleGp, 0),
+          servicesGp: rows.reduce((a, r) => a + r.servicesGp, 0),
+          grossProfit: rows.reduce((a, r) => a + r.grossProfit, 0),
+          fixedSales: rows.reduce((a, r) => a + r.fixedSales, 0),
+          variableSales: rows.reduce((a, r) => a + r.variableSales, 0),
+          marketing: rows.reduce((a, r) => a + r.marketing, 0),
+          endingBridge: rows[rows.length - 1].bridgeBalance,
+          netCash: rows.reduce((a, r) => a + r.monthlyCash, 0),
+          endingCumulative: rows[rows.length - 1].cumulativeCash,
+        });
+      });
+
+      return {
+        monthly,
+        annual,
+        summary: {
+          breakevenMonth,
+          peakCashNeed: Math.abs(peakCashNeed),
+          peakMonth,
+          endingCumulative: cumulative,
+        },
+      };
+    }
+
+    function renderLineChart(container, seriesA, seriesB, options = {}) {
+      const width = container.clientWidth || 640;
+      const height = container.clientHeight || 300;
+      const pad = { top: 20, right: 20, bottom: 30, left: 56 };
+      const data = seriesB ? seriesA.concat(seriesB) : seriesA.slice();
+      const min = Math.min(...data, 0);
+      const max = Math.max(...data, 0);
+      const span = Math.max(1, max - min);
+      const x = i => pad.left + (i / Math.max(1, seriesA.length - 1)) * (width - pad.left - pad.right);
+      const y = v => pad.top + ((max - v) / span) * (height - pad.top - pad.bottom);
+
+      function pathFor(values) {
+        return values.map((v, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(2)} ${y(v).toFixed(2)}`).join(' ');
+      }
+
+      const zeroY = y(0);
+      let grid = '';
+      for (let i = 0; i < 5; i++) {
+        const gy = pad.top + (i / 4) * (height - pad.top - pad.bottom);
+        const val = max - (i / 4) * span;
+        grid += `<line x1="${pad.left}" y1="${gy}" x2="${width - pad.right}" y2="${gy}" stroke="var(--artifact-border-light)" stroke-width="1" />`;
+        grid += `<text x="${pad.left - 10}" y="${gy + 4}" text-anchor="end" fill="var(--artifact-text-secondary)" font-size="11">${moneyShort(val)}</text>`;
+      }
+      let xTicks = '';
+      [0, 5, 11, 17, 23, 29, 35].forEach(i => {
+        if (seriesA[i] === undefined) return;
+        xTicks += `<text x="${x(i)}" y="${height - 8}" text-anchor="middle" fill="var(--artifact-text-secondary)" font-size="11">M${i + 1}</text>`;
+      });
+
+      const areaPath = pathFor(seriesA) + ` L ${x(seriesA.length - 1).toFixed(2)} ${y(0).toFixed(2)} L ${x(0).toFixed(2)} ${y(0).toFixed(2)} Z`;
+      const secondary = seriesB ? `<path d="${pathFor(seriesB)}" fill="none" stroke="var(--artifact-chart-magenta)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />` : '';
+      const bars = options.bars ? options.bars.map((v, i) => {
+        const bw = Math.max(6, (width - pad.left - pad.right) / options.bars.length - 4);
+        const bx = x(i) - bw / 2;
+        const by = Math.min(y(v), zeroY);
+        const bh = Math.abs(y(v) - zeroY);
+        return `<rect x="${bx.toFixed(2)}" y="${by.toFixed(2)}" width="${bw.toFixed(2)}" height="${Math.max(1, bh).toFixed(2)}" rx="3" fill="var(--artifact-chart-olive)" opacity="0.85" />`;
+      }).join('') : '';
+
+      container.innerHTML = `
+        <svg width="100%" height="100%" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" role="img" aria-label="Chart">
+          <defs>
+            <linearGradient id="areaFill" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="var(--artifact-chart-indigo)" stop-opacity="0.28"></stop>
+              <stop offset="100%" stop-color="var(--artifact-chart-indigo)" stop-opacity="0.03"></stop>
+            </linearGradient>
+          </defs>
+          ${grid}
+          <line x1="${pad.left}" y1="${zeroY}" x2="${width - pad.right}" y2="${zeroY}" stroke="var(--artifact-chart-tangerine)" stroke-width="1.5" stroke-dasharray="5 5" />
+          <path d="${areaPath}" fill="url(#areaFill)"></path>
+          ${bars}
+          <path d="${pathFor(seriesA)}" fill="none" stroke="var(--artifact-chart-indigo)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+          ${secondary}
+          ${xTicks}
+        </svg>`;
+    }
+
+    function renderKPIs(result, config) {
+      const breakeven = result.summary.breakevenMonth ? 'M' + result.summary.breakevenMonth : 'No BE';
+      const peak = result.summary.peakCashNeed;
+      const year1 = result.annual[0];
+      const year3 = result.annual[2];
+      const cashGapBRL = peak * (config.fx_rate || 5.4);
+      const rows = [
+        { cls: 'warn', label: 'Breakeven month', value: breakeven, meta: 'Base case from current inputs' },
+        { cls: 'negative', label: 'Peak cash need', value: moneyShort(peak), meta: money(cashGapBRL / (config.fx_rate || 5.4), config.fx_rate || 5.4, 'BRL') + ' at current FX' },
+        { cls: 'positive', label: 'Year 1 net cash', value: moneyShort(year1.netCash), meta: 'After commercial spend and bridge build' },
+        { cls: 'positive', label: 'Year 3 net cash', value: moneyShort(year3.netCash), meta: 'Scale-year cash generation' },
+        { cls: 'positive', label: '36M cumulative', value: moneyShort(result.summary.endingCumulative), meta: 'Modeled ending cumulative cash' },
+      ];
+      document.getElementById('kpis').innerHTML = rows.map(r => `
+        <div class="kpi ${r.cls}">
+          <div class="label">${r.label}</div>
+          <div class="value">${r.value}</div>
+          <div class="meta">${r.meta}</div>
+        </div>`).join('');
+      document.getElementById('breakevenTag').textContent = `${activeScenario} scenario`;
+    }
+
+    function renderBridgeMini(result) {
+      const items = result.annual.map((row, idx) => `
+        <div class="mini-metric">
+          <div class="small">${row.year} closing bridge</div>
+          <div class="big">${moneyShort(row.endingBridge)}</div>
+          <div class="small">${row.totalClosed.toFixed(1)} closed customers</div>
+        </div>`).join('');
+      document.getElementById('bridgeMini').innerHTML = items;
+    }
+
+    function renderAnnualTable(result) {
+      const head = `
+        <tr>
+          <th>Year</th>
+          <th>Closed clients</th>
+          <th>Resale GP</th>
+          <th>Services GP</th>
+          <th>Gross profit</th>
+          <th>Sales fixed</th>
+          <th>Sales variable</th>
+          <th>Marketing</th>
+          <th>Bridge balance</th>
+          <th>Net cash</th>
+        </tr>`;
+      const body = result.annual.map(row => `
+        <tr>
+          <td>${row.year}</td>
+          <td>${row.totalClosed.toFixed(1)}</td>
+          <td>${money(row.resaleGp)}</td>
+          <td>${money(row.servicesGp)}</td>
+          <td>${money(row.grossProfit)}</td>
+          <td>${money(row.fixedSales)}</td>
+          <td>${money(row.variableSales)}</td>
+          <td>${money(row.marketing)}</td>
+          <td>${money(row.endingBridge)}</td>
+          <td>${money(row.netCash)}</td>
+        </tr>`).join('');
+      document.getElementById('annualTable').innerHTML = `<thead>${head}</thead><tbody>${body}</tbody>`;
+    }
+
+    function renderMonthlyTable(result) {
+      const head = `
+        <tr>
+          <th>Month</th>
+          <th>Year</th>
+          <th>Closed</th>
+          <th>Gross profit</th>
+          <th>Sales spend</th>
+          <th>Marketing</th>
+          <th>Bridge bal.</th>
+          <th>Monthly cash</th>
+          <th>Cumulative cash</th>
+        </tr>`;
+      const body = result.monthly.map(row => {
+        const cashClass = row.monthlyCash >= 0 ? 'pos' : 'neg';
+        const cumClass = row.cumulativeCash >= 0 ? 'pos' : 'neg';
+        const highlight = row.monthIndex === result.summary.breakevenMonth ? 'highlight' : '';
+        return `
+          <tr class="${highlight}">
+            <td>${monthLabel(row.monthIndex)}</td>
+            <td>${row.year}</td>
+            <td>${row.totalClosed.toFixed(2)}</td>
+            <td>${money(row.grossProfit)}</td>
+            <td>${money(row.fixedSales + row.variableSales)}</td>
+            <td>${money(row.marketing)}</td>
+            <td>${money(row.bridgeBalance)}</td>
+            <td class="${cashClass}">${money(row.monthlyCash)}</td>
+            <td class="${cumClass}">${money(row.cumulativeCash)}</td>
+          </tr>`;
+      }).join('');
+      document.getElementById('monthlyTable').innerHTML = `<thead>${head}</thead><tbody>${body}</tbody>`;
+    }
+
+    function renderNotes(config, result) {
+      const gap = Math.max(0, config.customer_collection_days - config.glean_payment_days);
+      document.getElementById('assumptionNote').innerHTML = `Model note: this version spreads closed deals evenly across each active year, applies the Year 1 ramp delay directly to the first year, and treats the working-capital bridge as the portion of license cost financed during the ${gap}-day collection gap. It preserves the document's logic of $${config.avg_arr.toLocaleString()} average ARR, ${(config.services_attach_rate * 100).toFixed(0)}% services attach, ${(config.services_gross_margin * 100).toFixed(0)}% services gross margin, and year-by-year A/B/C motion mix unless you change the controls.`;
+    }
+
+    function render(config) {
+      const result = calculate(config);
+      renderKPIs(result, config);
+      renderBridgeMini(result);
+      renderAnnualTable(result);
+      renderMonthlyTable(result);
+      renderNotes(config, result);
+      renderLineChart(
+        document.getElementById('cumChart'),
+        result.monthly.map(r => r.cumulativeCash)
+      );
+      renderLineChart(
+        document.getElementById('flowChart'),
+        result.monthly.map(r => r.bridgeBalance),
+        result.monthly.map(r => r.bridgeBalance),
+        { bars: result.monthly.map(r => r.monthlyCash) }
+      );
+    }
+
+    function baseScenario() {
+      activeScenario = 'Base';
+      const config = deepClone(baseConfig);
+      applyConfigToInputs(config);
+      render(config);
+    }
+
+    function conservativeScenario() {
+      activeScenario = 'Conservative';
+      const config = deepClone(baseConfig);
+      config.customer_collection_days = 60;
+      config.years[0].sales_start_delay_months = 8;
+      config.years.forEach((y, idx) => {
+        y.conversion.A *= 0.85;
+        y.conversion.B *= 0.9;
+        y.conversion.C *= 0.95;
+        if (idx === 0) y.mapped.A += 1;
+      });
+      config.services_gross_margin = Math.max(0.25, config.services_gross_margin - 0.05);
+      applyConfigToInputs(config);
+      render(config);
+    }
+
+    function aggressiveScenario() {
+      activeScenario = 'Aggressive';
+      const config = deepClone(baseConfig);
+      config.customer_collection_days = 35;
+      config.years[0].sales_start_delay_months = 5;
+      config.years.forEach(y => {
+        y.conversion.A *= 1.15;
+        y.conversion.B *= 1.10;
+        y.conversion.C *= 1.05;
+      });
+      config.services_attach_rate = Math.min(0.7, config.services_attach_rate + 0.1);
+      applyConfigToInputs(config);
+      render(config);
+    }
+
+    function init() {
+      const config = deepClone(baseConfig);
+      config.fx_rate = 5.4;
+      applyConfigToInputs(config);
+      render(config);
+      document.querySelectorAll('input').forEach(el => el.addEventListener('input', () => {
+        activeScenario = 'Custom';
+        render(getConfigFromInputs());
+      }));
+      document.getElementById('baseBtn').addEventListener('click', baseScenario);
+      document.getElementById('consBtn').addEventListener('click', conservativeScenario);
+      document.getElementById('aggBtn').addEventListener('click', aggressiveScenario);
+      window.addEventListener('resize', () => render(getConfigFromInputs()));
+    }
+
+    init();
+  </script>
+
+  <script>
+    window.GleanBridge.postMessage({
+      actionId: 'export-pdf',
+      type: 'glean-add-menu',
+      metadata: { label: 'Export as PDF', icon: 'export' }
+    });
+    window.GleanBridge.onMessage('action', function(data) {
+      if (data.actionId === 'export-pdf') window.print();
+    });
+
+    function prepareChartsForPrint() {
+      document.querySelectorAll('[_echarts_instance_]').forEach(function(el) {
+        var chart = echarts.getInstanceByDom(el);
+        if (!chart) return;
+        var img = new Image();
+        img.src = chart.getDataURL({ type: 'png', pixelRatio: 2 });
+        img.className = 'print-chart-img';
+        img.style.cssText =
+          'width:100%;height:100%;object-fit:contain;' +
+          'position:absolute;top:0;left:0;z-index:10;';
+        el.dataset.prevPosition = el.style.position;
+        el.style.position = 'relative';
+        el.appendChild(img);
+      });
+    }
+
+    function cleanUpAfterPrint() {
+      document.querySelectorAll('[_echarts_instance_]').forEach(function(el) {
+        var img = el.querySelector('.print-chart-img');
+        if (!img) return;
+        img.remove();
+        el.style.position = el.dataset.prevPosition || '';
+        delete el.dataset.prevPosition;
+      });
+    }
+
+    window.addEventListener('beforeprint', prepareChartsForPrint);
+    window.addEventListener('afterprint', cleanUpAfterPrint);
+  </script>
+</body>
+</html>
